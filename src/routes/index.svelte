@@ -235,6 +235,7 @@
       timetable.Friday.splice(index, 1);
       timetable = timetable;
     }
+    saveEntry()
   }
 
   function setTimeSlot(day, index, newName, newPeriod, newStyle) {
@@ -259,14 +260,39 @@
       timetable.Friday[index].period= newPeriod;
       timetable.Friday[index].style= newStyle;
     }
+    saveEntry()
   }
 
+  
+  // Upsert entry
+  async function saveEntry() {
+    const { error } = await supabase.from("studentEntries").upsert(
+      {
+        user_id: supabase.auth.user().id,
+        timetable: timetable,
+      },
+      { onConflict: "user_id" }
+    );
+    if (error) alert(error.message);
+  }
 
-    async function logout() {
-   	 const { error } = await supabase.auth.signOut();
+  async function logout() {
+    const { error } = await supabase.auth.signOut();
 
-   	 if (error) alert(error.message); // alert if error
+    if (error) alert(error.message); // alert if error
+  }
+
+  // Get entries
+  async function getEntries() {
+    const { data, error } = await supabase.from("studentEntries").select();
+    if (error) alert(error.message);
+
+    if (data != "") {
+      timetable = data[0].timetable;
     }
+  }
+
+  getEntries();
 
 </script>
 
